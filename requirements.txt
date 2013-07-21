@@ -1,6 +1,7 @@
 Flask==0.8
 oauth2==1.5.211
 pymongo==2.3
+requests==1.2.3
 
 # For interacting with AWS via Python
 boto==2.4.1

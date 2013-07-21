@@ -10,14 +10,17 @@ This hosts the following dashboards:
 It will house more dashboards for fundamental metrics we want to track.
 """
 
+
 import collections
 import datetime
+import json
 import optparse
 import os
 import time
 
 import flask
 import pymongo
+import requests
 
 import auth
 import data
@@ -879,6 +882,107 @@ def webpagetest_stats():
     return flask.render_template('webpagetest/stats.html', **template_dict)
 
 
+@app.route('/statusboard/company-goals')
+def statusboard_company_goals():
+    """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
+
+    url = "http://107.21.23.204:27080/report/company_metrics/_find"
+    payload = {"batch_size" : 15000, "sort" : json.dumps({"activity_month" : 1})}
+    request = requests.get(url, params=payload)
+    data = request.json()
+
+    long_term_users = []
+    registered_users_this_month = []
+    highly_engaged_users = []
+
+    for data_point in data["results"]:
+        date = data_point["activity_month"]
+        long_term_users.append({"title": date, "value": data_point["long_term_users_active_this_month"]})
+        registered_users_this_month.append({"title": date, "value": data_point["registrations_this_month"]})
+        highly_engaged_users.append({"title": date, "value": data_point["highly_engaged_users_active_this_month"]})
+
+    company_goals = {
+        "graph" : {
+            "title" : "Company Growth Metrics",
+            "type" : "line",
+            "datasequences" : [
+                {
+                "title" : "Long term users",
+                "color" : "pink",
+                "datapoints" : long_term_users
+                },
+                {
+                "title" : "Highly engaged users",
+                "color" : "green",
+                "datapoints" : highly_engaged_users
+                },
+                {
+                "title" : "Registered users",
+                "datapoints" : registered_users_this_month
+                }
+            ]
+        }
+    }
+
+    return flask.jsonify(company_goals)
+
+
+@app.route('/statusboard/exercises')
+def statusboard_exercises():
+    """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
+
+    url = "http://107.21.23.204:27080/report/daily_exercise_stats/_find?"
+    criteria = json.dumps({
+        "exercise" : "ALL",
+        "sub_mode" : "everything",
+        "super_mode" : "everything"
+    })
+    payload = {
+        "criteria" : criteria,
+        "sort" : json.dumps({"dt": 1}),
+        "batch_size" : 30
+    }
+    request = requests.get(url, params=payload)
+    data = request.json()
+
+    daily_exercises = []
+
+    # for data_point in data["results"]:
+    #     date = data_point["dt"]
+
+    exercises = {
+        "graph" : {
+            "title" : "Problems done in the last month",
+            "type" : "line",
+            "total" : "true",
+            "datasequences" : [
+                {
+                "title" : "Problems",
+                "color" : "red",
+                "datapoints" : daily_exercises
+                }
+            ]
+        }
+    }
+
+    return flask.jsonify(data)
+
+
+@app.route('/statusboard/exercises/daily')
+def statusboard_exercises_daily():
+    """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
+
+
+@app.route('/statusboard/videos')
+def statusboard_videos():
+    """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
+
+
+@app.route('/statusboard/videos/daily')
+def statusboard_videos_daily():
+    """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
+
+
 def utc_as_dt(days_ago=0):
     """Today's UTC date as a string dt for use in a mongo query.
 
@@ -961,7 +1065,7 @@ def main():
         if port == -1:
             port = 5000
         auth.configure_app(app, required=False)
-        app.run(port=port)
+        app.run(host='0.0.0.0', port=port)
     else:
         if port == -1:
             port = 80

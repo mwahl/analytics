@@ -17,6 +17,7 @@ import json
 import optparse
 import os
 import time
+from operator import itemgetter
 
 import flask
 import pymongo
@@ -887,7 +888,7 @@ def statusboard_company_goals():
     """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
 
     url = "http://107.21.23.204:27080/report/company_metrics/_find"
-    payload = {"batch_size" : 15000, "sort" : json.dumps({"activity_month" : 1})}
+    payload = {"batch_size": 15000, "sort": json.dumps({"activity_month": 1})}
     request = requests.get(url, params=payload)
     data = request.json()
 
@@ -902,23 +903,23 @@ def statusboard_company_goals():
         highly_engaged_users.append({"title": date, "value": data_point["highly_engaged_users_active_this_month"]})
 
     company_goals = {
-        "graph" : {
-            "title" : "Company Growth Metrics",
-            "type" : "line",
-            "datasequences" : [
+        "graph": {
+            "title": "Company Growth Metrics",
+            "type": "line",
+            "datasequences": [
                 {
-                "title" : "Long term users",
-                "color" : "pink",
-                "datapoints" : long_term_users
+                "title": "Long term users",
+                "color": "pink",
+                "datapoints": long_term_users
                 },
                 {
-                "title" : "Highly engaged users",
-                "color" : "green",
-                "datapoints" : highly_engaged_users
+                "title": "Highly engaged users",
+                "color": "green",
+                "datapoints": highly_engaged_users
                 },
                 {
-                "title" : "Registered users",
-                "datapoints" : registered_users_this_month
+                "title": "Registered users",
+                "datapoints": registered_users_this_month
                 }
             ]
         }
@@ -933,39 +934,40 @@ def statusboard_exercises():
 
     url = "http://107.21.23.204:27080/report/daily_exercise_stats/_find?"
     criteria = json.dumps({
-        "exercise" : "ALL",
-        "sub_mode" : "everything",
-        "super_mode" : "everything"
+        "exercise": "ALL",
+        "sub_mode": "everything",
+        "super_mode": "everything"
     })
     payload = {
-        "criteria" : criteria,
-        "sort" : json.dumps({"dt": 1}),
-        "batch_size" : 30
+        "criteria": criteria,
+        "sort": json.dumps({"dt": -1}),
+        "batch_size": 28
     }
     request = requests.get(url, params=payload)
     data = request.json()
 
     daily_exercises = []
 
-    # for data_point in data["results"]:
-    #     date = data_point["dt"]
+    for data_point in data["results"]:
+        daily_exercises.append({"title": data_point["dt"], "value": data_point["problems"]})
+    daily_exercises.reverse()
 
     exercises = {
-        "graph" : {
-            "title" : "Problems done in the last month",
-            "type" : "line",
-            "total" : "true",
-            "datasequences" : [
+        "graph": {
+            "title": "Exercises",
+            "type": "line",
+            "total": True,
+            "datasequences": [
                 {
-                "title" : "Problems",
-                "color" : "red",
-                "datapoints" : daily_exercises
+                "title": "Problems per day",
+                "color": "red",
+                "datapoints": daily_exercises
                 }
             ]
         }
     }
 
-    return flask.jsonify(data)
+    return flask.jsonify(exercises)
 
 
 @app.route('/statusboard/exercises/daily')
@@ -976,6 +978,34 @@ def statusboard_exercises_daily():
 @app.route('/statusboard/videos')
 def statusboard_videos():
     """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
+
+    start_dt = flask.request.args.get('start_date', '')
+    end_dt = flask.request.args.get('end_date', '')
+    title = flask.request.args.get('title', 'Total')
+    duration = flask.request.args.get('time_scale', 'day')
+    results = sorted(data.video_title_summary(db, title, duration, start_dt, end_dt), key=itemgetter('dt'), reverse=True)
+
+    daily_videos = []
+
+    for result in results[:28]:
+        daily_videos.append({"title": result["dt"], "value": result["hours_all"]})
+
+    videos = {
+        "graph": {
+            "title": "Videos",
+            "type": "line",
+            "total": True,
+            "datasequences": [
+                {
+                "title": "Videos per day",
+                "color": "blue",
+                "datapoints": daily_videos
+                }
+            ]
+        }
+    }
+
+    return flask.jsonify(videos)
 
 
 @app.route('/statusboard/videos/daily')

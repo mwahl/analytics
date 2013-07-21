@@ -971,14 +971,30 @@ def statusboard_exercises():
     return flask.jsonify(exercises)
 
 
-@app.route('/statusboard/exercises/daily')
-def statusboard_exercises_daily():
-    """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
-
-
 @app.route('/statusboard/videos')
 def statusboard_videos():
     """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
+    pass
+
+
+@app.route('/statusboard/exercises/daily/widget')
+def statusboard_exercises_daily_widget():
+    """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
+    return flask.render_template(
+        "statusboard-counter-widget.html",
+        title="Exercises today",
+        value="",
+        source="http://khanacademy.org/api/v1/dev/statusboard/exercises")
+
+
+@app.route('/statusboard/videos/daily/widget')
+def statusboard_videos_daily_widget():
+    """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
+    return flask.render_template(
+        "statusboard-counter-widget.html",
+        title="Videos today",
+        value="",
+        source="http://khanacademy.org/api/v1/dev/statusboard/videos")
 
     start_dt = flask.request.args.get('start_date', '')
     end_dt = flask.request.args.get('end_date', '')
@@ -1009,9 +1025,14 @@ def statusboard_videos():
     return flask.jsonify(videos)
 
 
-@app.route('/statusboard/videos/daily')
-def statusboard_videos_daily():
+@app.route('/statusboard/stories/widget')
+def statusboard_stories_widget():
     """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
+    return flask.render_template(
+        "statusboard-story-widget.html",
+        title="Stories",
+        value="",
+        source="http://www.khanacademy.org/api/v1/stories?count=100")
 
 
 def utc_as_dt(days_ago=0):

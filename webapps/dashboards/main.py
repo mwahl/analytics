@@ -919,6 +919,7 @@ def statusboard_company_goals():
                 },
                 {
                 "title": "Registered users",
+                "color": "orange",
                 "datapoints": registered_users_this_month
                 }
             ]
@@ -955,12 +956,12 @@ def statusboard_exercises():
     exercises = {
         "graph": {
             "title": "Exercises",
-            "type": "line",
+            "type": "bar",
             "total": True,
             "datasequences": [
                 {
                 "title": "Problems per day",
-                "color": "red",
+                "color": "yellow",
                 "datapoints": daily_exercises
                 }
             ]
@@ -993,11 +994,11 @@ def statusboard_videos():
     videos = {
         "graph": {
             "title": "Videos",
-            "type": "line",
+            "type": "bar",
             "total": True,
             "datasequences": [
                 {
-                "title": "Videos per day",
+                "title": "Hours viewed per day",
                 "color": "blue",
                 "datapoints": daily_videos
                 }

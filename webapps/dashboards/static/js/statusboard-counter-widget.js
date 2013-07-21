@@ -22,6 +22,14 @@ var updateDisplay = function() {
         var secsElapsedToday = (now - todayMidnight) / 1000;
         var percentDayComplete = secsElapsedToday / 86400;
         var displayValue = Math.floor(value * percentDayComplete);
-        $("#value").text(displayValue);
+        $("#value").text(commaSeparateNumber(displayValue));
     }, 1000 * Math.random());
+};
+
+// http://stackoverflow.com/a/12947816
+var commaSeparateNumber = function(val) {
+    while (/(\d+)(\d{3})/.test(val.toString())){
+        val = val.toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+    }
+    return val;
 };

@@ -974,28 +974,6 @@ def statusboard_exercises():
 @app.route('/statusboard/videos')
 def statusboard_videos():
     """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
-    pass
-
-
-@app.route('/statusboard/exercises/daily/widget')
-def statusboard_exercises_daily_widget():
-    """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
-    return flask.render_template(
-        "statusboard-counter-widget.html",
-        title="Exercises today",
-        value="",
-        source="http://khanacademy.org/api/v1/dev/statusboard/exercises")
-
-
-@app.route('/statusboard/videos/daily/widget')
-def statusboard_videos_daily_widget():
-    """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
-    return flask.render_template(
-        "statusboard-counter-widget.html",
-        title="Videos today",
-        value="",
-        source="http://khanacademy.org/api/v1/dev/statusboard/videos")
-
     start_dt = flask.request.args.get('start_date', '')
     end_dt = flask.request.args.get('end_date', '')
     title = flask.request.args.get('title', 'Total')
@@ -1023,6 +1001,63 @@ def statusboard_videos_daily_widget():
     }
 
     return flask.jsonify(videos)
+
+
+@app.route('/statusboard/exercises/daily/widget')
+def statusboard_exercises_daily_widget():
+    """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
+    return flask.render_template(
+        "statusboard-counter-widget.html",
+        title="Exercises completed today",
+        value="",
+        source="/statusboard/exercises/daily/value")
+
+
+@app.route('/statusboard/videos/daily/widget')
+def statusboard_videos_daily_widget():
+    """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
+    return flask.render_template(
+        "statusboard-counter-widget.html",
+        title="Hours of video watched today",
+        value="",
+        source="/statusboard/videos/daily/value")
+
+
+@app.route('/statusboard/exercises/daily/value')
+def statusboard_exercises_daily_value():
+    url = "http://107.21.23.204:27080/report/daily_exercise_stats/_find?"
+    criteria = json.dumps({
+        "exercise": "ALL",
+        "sub_mode": "everything",
+        "super_mode": "everything"
+    })
+    payload = {
+        "criteria": criteria,
+        "sort": json.dumps({"dt": -1}),
+        "batch_size": 7
+    }
+    request = requests.get(url, params=payload)
+    data = request.json()
+
+    week_ago = datetime.date.today() - datetime.timedelta(days=7)
+    week_ago_str = week_ago.strftime("%Y-%m-%d")
+
+    for result in data["results"]:
+        if result["dt"] == week_ago_str:
+            return flask.jsonify({"value": result["problems"]})
+
+    return flask.jsonify({"value": ""})
+
+
+@app.route('/statusboard/videos/daily/value')
+def statusboard_videos_daily_value():
+    start_dt = datetime.date.today() - datetime.timedelta(days=7)
+    end_dt = start_dt + datetime.timedelta(days=1)
+    start_dt_str = start_dt.strftime("%Y-%m-%d")
+    end_dt_str = end_dt.strftime("%Y-%m-%d")
+    summary = data.video_title_summary(
+        db, "Total", "day", start_dt_str, end_dt_str)
+    return flask.jsonify({"value": summary[0]["hours_all"]})
 
 
 @app.route('/statusboard/stories/widget')

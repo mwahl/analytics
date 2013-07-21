@@ -61,11 +61,12 @@ p
 
 h2
 {
-    width: 180px;
     margin: 0px auto;
-    padding-top: 20px;
-    font-size: 16px;
-    line-height: 18px;
-    color: #7e7e7e;
+    margin-top: 8px;
+    margin-left: 14px;
+    font-size: 21px;
+    line-height: 21px;
+    color: white;
     text-transform: uppercase;
+    text-align: left;
 }

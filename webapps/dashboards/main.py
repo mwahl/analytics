@@ -1018,7 +1018,7 @@ def statusboard_videos_daily_widget():
     """ (Hack2013): Company stats dashboard via panic.com/statusboard"""
     return flask.render_template(
         "statusboard-counter-widget.html",
-        title="Hours of video watched today",
+        title="Minutes of video watched today",
         value="",
         source="/statusboard/videos/daily/value")
 
@@ -1057,7 +1057,7 @@ def statusboard_videos_daily_value():
     end_dt_str = end_dt.strftime("%Y-%m-%d")
     summary = data.video_title_summary(
         db, "Total", "day", start_dt_str, end_dt_str)
-    return flask.jsonify({"value": summary[0]["hours_all"]})
+    return flask.jsonify({"value": summary[0]["hours_all"]*60})
 
 
 @app.route('/statusboard/stories/widget')

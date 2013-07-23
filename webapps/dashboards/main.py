@@ -983,7 +983,8 @@ def statusboard_videos():
     daily_videos = []
 
     for result in results[:28]:
-        daily_videos.append({"title": result["dt"], "value": result["hours_all"]})
+        daily_videos.append({"title": result["dt"], "value": int(result["hours_all"]*60)})
+    daily_videos.reverse()
 
     videos = {
         "graph": {
@@ -992,7 +993,7 @@ def statusboard_videos():
             "total": True,
             "datasequences": [
                 {
-                "title": "Hours viewed per day",
+                "title": "Minutes viewed per day",
                 "color": "blue",
                 "datapoints": daily_videos
                 }

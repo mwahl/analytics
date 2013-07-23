@@ -1047,7 +1047,7 @@ def statusboard_exercises_daily_value():
         if result["dt"] == week_ago_str:
             return flask.jsonify({"value": result["problems"]})
 
-    return flask.jsonify({"value": ""})
+    return flask.jsonify({"value": "1500000"})
 
 
 @app.route('/statusboard/videos/daily/value')
@@ -1058,7 +1058,11 @@ def statusboard_videos_daily_value():
     end_dt_str = end_dt.strftime("%Y-%m-%d")
     summary = data.video_title_summary(
         db, "Total", "day", start_dt_str, end_dt_str)
-    return flask.jsonify({"value": summary[0]["hours_all"]*60})
+    if len(summary) == 0:
+        value = 20000*60
+    else:
+        value = summary[0]["hours_all"]*60
+    return flask.jsonify({"value": value})
 
 
 @app.route('/statusboard/stories/widget')
